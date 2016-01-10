@@ -1,0 +1,87 @@
+
+group = 'name.martingeisse'
+version = '0.1'
+
+apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'war'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+project.webAppDirName = "WebContent"
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+eclipse {
+	project {
+		referencedProjects 'awesome-wicket-components'
+	}
+	wtp {
+		component {
+			deployName = 'server-blob'
+			resource sourcePath: 'WebContent', deployPath: '/', tag: 'defaultRootSource'
+			property name: 'java-output-path', value: '/server-blob/build/classes'
+		}
+		facet {
+			facet type: 'fixed', name: 'jst.web'
+			facet type: 'fixed', name: 'wst.jsdt.web'
+			facet type: 'fixed', name: 'java'
+			facet type: 'installed', name: 'jst.web', version: '3.0'
+			facet type: 'installed', name: 'wst.jsdt.web', version: '1.0'
+			facet type: 'installed', name: 'java', version: '1.8'
+			file {
+				withXml {
+					def node = it.asNode()
+					node.appendNode('runtime', [name: 'Apache Tomcat v7.0']);
+				}
+			}
+		}
+	}
+	classpath {
+		containers 'org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v7.0';
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	// JSRs
+	compile 'com.google.code.findbugs:jsr305:3.0.0'
+
+	// web server
+	providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+	testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+
+	// common helper libraries
+	compile 'org.apache.commons:commons-lang3:3.0'
+	compile 'commons-io:commons-io:2.4'
+	compile 'commons-collections:commons-collections:3.2.1'
+	compile 'org.apache.commons:commons-exec:1.3'
+	compile 'com.google.guava:guava:18.0'
+	compile 'joda-time:joda-time:2.5'
+	compile 'log4j:log4j:1.2.17'
+	compile 'commons-beanutils:commons-beanutils:1.9.2'
+	compile 'commons-codec:commons-codec:1.9'
+
+	// Wicket
+	compile('org.apache.wicket:wicket-core:7.1.0') {
+		exclude group: 'org.apache.wicket', module: 'wicket'
+	}
+	compile('org.apache.wicket:wicket-extensions:7.1.0') {
+		exclude group: 'org.apache.wicket', module: 'wicket'
+	}
+	compile('org.wicketstuff:wicketstuff-stateless:7.1.0') {
+		exclude group: 'org.apache.wicket', module: 'wicket'
+	}
+
+	// JSON
+	compile 'com.google.code.gson:gson:2.3'
+	
+	// awesome-wicket-components
+	compile project(':awesome-wicket-components')
+
+}
