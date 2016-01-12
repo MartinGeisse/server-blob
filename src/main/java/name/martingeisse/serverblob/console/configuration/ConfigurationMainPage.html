@@ -1,0 +1,40 @@
+<html>
+	<wicket:head>
+		<style type="text/css">
+
+			.links > .link {
+				display: block;
+				background-color: #eee;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+			}
+
+			.links > .link > .icon-container {
+				text-align: center;
+				height: 150px;
+			}
+			
+			.links > .link > .icon-container > img {
+				width: 60%;
+			}
+			
+			.links > .link > .caption {
+				text-align: center;
+			}
+			
+		</style>
+	</wicket:head>
+	<body>
+		<wicket:extend>
+			<h2>Configuration</h2>
+			<div wicket:id="links" class="links">
+				<a wicket:id="link" class="link col-xs-12 col-lg-2">
+					<div class="icon-container">
+						<img wicket:id="icon">
+					</div>
+					<div wicket:id="caption" class="caption"></div>
+				</a>
+			</div>
+		</wicket:extend>
+	</body>
+</html>

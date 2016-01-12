@@ -1,0 +1,35 @@
+<html>
+	<wicket:head>
+		<style type="text/css">
+		
+			.navigation-side-bar > div {
+				padding: 3px 0px;
+			}
+		
+			.navigation-side-bar > div.logout {
+				margin-top: 30px;
+			}
+			
+			h2 {
+				margin-top: 0px
+			}
+		
+		</style>
+	</wicket:head>
+	<body>
+		<wicket:border>
+			<div class="clearfix" style="height: 50px;"></div>
+			<div class="col-xs-12 col-lg-2 navigation-side-bar">
+				<div wicket:id="sectionButtons">
+					<a class="btn btn-default btn-block" wicket:id="sectionButton"><span wicket:id="buttonContents" /></a>
+				</div>
+				<div class="logout">
+					<a class="btn btn-default btn-block" wicket:id="logoutButton">Logout</a>
+				</div>
+			</div>
+			<div class="col-xs-12 col-lg-10">
+				<wicket:body />
+			</div>
+		</wicket:border>
+	</body>
+</html>

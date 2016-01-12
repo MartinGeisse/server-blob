@@ -1,0 +1,20 @@
+
+I *have* to simplify things, even at the cost of losing some features. That's the core of
+standardizing metrics. The key simplification is:
+
+	Each metric has a user-defined sampling rate. It produces a value once per sampling
+	interval. It doesn't have to be able to produce values in between, nor does it
+	have to be able to repeat a value.
+	
+Consequences:
+- getValue() gets replaced by a method that is called once per sampling interval
+- there is no client-callable value accessor at the metric implementation
+- but the metric *system* can provide a wrapper that is able to repeat the latest value
+- this wrapper could also store ID, displayName, and sampling rate.
+- based on the samples, the metric system can produce derived data such as averages. In such
+	a case, the *sampling* rate is how often the underlying implementation is asked for a value.
+
+Metric base implementations:
+- if the metric is defined by just a getter, things are simple
+- if the metric has a natural sampling rate at which it produces values, then it must be re-sampled to the user-defined rate
+- if the metric collects values at random events (points in time), then they must be combined (added, averaged, ...)

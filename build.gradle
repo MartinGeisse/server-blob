@@ -33,13 +33,13 @@ eclipse {
 			file {
 				withXml {
 					def node = it.asNode()
-					node.appendNode('runtime', [name: 'Apache Tomcat v7.0']);
+					node.appendNode('runtime', [name: 'local']);
 				}
 			}
 		}
 	}
 	classpath {
-		containers 'org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v7.0';
+		containers 'org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/local';
 	}
 }
 
@@ -66,6 +66,14 @@ dependencies {
 	compile 'log4j:log4j:1.2.17'
 	compile 'commons-beanutils:commons-beanutils:1.9.2'
 	compile 'commons-codec:commons-codec:1.9'
+	
+	// reflection
+	compile 'org.reflections:reflections:0.9.10'
+	
+	// dependency injection
+	compile 'com.google.inject:guice:4.0'
+	compile 'com.google.inject.extensions:guice-servlet:4.0'
+	compile 'com.google.inject.extensions:guice-multibindings:4.0'
 
 	// Wicket
 	compile('org.apache.wicket:wicket-core:7.1.0') {

@@ -1,0 +1,11 @@
+
+Dashboard functionality:
+- widgets to place on homepage of management console
+- dashboard pages in general (outside of management console) -- if this is a good idea at all
+	(needs some other authorization mechanism, but SSO support would be a good thing anyway)
+- cronjobs to update data for dashboard widgets
+
+NOT:
+- alerts & metrics. This is a module by itself. But once it exists, dashboard widgets that
+	*show* alerts & metrics would be useful.
+
