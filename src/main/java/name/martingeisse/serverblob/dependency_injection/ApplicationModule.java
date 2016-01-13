@@ -6,12 +6,15 @@
 
 package name.martingeisse.serverblob.dependency_injection;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.reflections.Reflections;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import name.martingeisse.serverblob.configuration.ConfigurationStore;
+import name.martingeisse.serverblob.configuration.FileConfigurationStore;
 
 /**
  *
@@ -40,6 +43,9 @@ public class ApplicationModule extends AbstractModule {
 			unsafeBind(multibinder, extension);
 		}
 
+		// other bindings
+		bind(ConfigurationStore.class).toInstance(new FileConfigurationStore(new File("resource/configuration")));
+		
 	}
 
 	private Class<?> findExtensionPointForExtension(Class<?> extensionClass) {

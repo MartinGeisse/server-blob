@@ -1,0 +1,21 @@
+
+Need a way to store the configuration. Need a way to distinguish
+- editable configuration stored in a writable source with serializers and deserializers
+	- any configuration, except noted below...
+- non-editable configuration stored in a read-only source with deserializers only
+	- configuration of the configuration store itself
+
+v1:
+- skip configuration of the configuration store
+- the configuration store is JSON files on disk (read/write)
+- provide ConfigurationStorage with implementation FileConfigurationStorage
+- uses classes as storage keys, mapped to MyClassName.json
+
+later:
+- keep configuration store configuration in Java property files on the server
+- keep everything else in the configuration store
+
+or:
+- keep cluster-joining information in Java property files or command-line parameters on the server
+- keep everything else in a network database (MySQL, etcd, ...)
+- TODO where to keep configuration database access configuration (e.g. etcd network address)
