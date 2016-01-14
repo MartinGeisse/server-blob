@@ -1,0 +1,53 @@
+
+What is configuration, what is static entities? Think of a template system -- are templates part
+of the configuration?
+
+As far as the code is concerned, they aren't part of what is typically considered "configuration":
+- they are too big and too numerous to be kept in memory all the time
+- so they are stored in some indexed database
+- they definitely don't require any kind of service restart or even server restart
+
+As far as the GUI is concerned, things aren't that obvious. But for the GUI, what's the point of
+distinguishing configuration vs. other stuff? Why not put everything that affects a service
+together -- configuration, administration, monitoring, logs...?
+- we still have "shared" configuration like database connections
+- because it's (presumably) less intuitive. Why does Eclipse keep preferences all together
+	in a preferences dialog and not spread them all over its views?
+	Because the action doesn't happen in views. It happens behind the scenes.
+	AND:
+	Because plugins don't start with specialized views. They start with specialized functionality.
+	So often there isn't a good place where to put the configuration stuff.
+	
+Furthermore, some modules such as the template system are not just for the management console.
+They have an *application* web GUI in addition to the *management* one. The same would be the case
+e.g. for an accounting module.
+- in the management console, this would make good top-level navigation sections that could also
+	be externally accessed (then without the navigation border), one per module
+- alternatively, the management console only shows management views and everything else is on
+	application pages outside the console, optionally viewable as iframes
+	--> but that raises the question: what is management and what is application? The difference
+	depends on the use-case. For example: Is changing the templates part of management?
+- the management console doesn't try to be "the application". Thats too big of a goal. So it's
+	management only; there *has* to be something else that is "the application" (or for
+	microservices, "the applications").
+- then, why have an integrated system at all? Integration, of course! Making things work together.
+
+Just a thought: There is an alternative architecture based on docker + microservices + an integrated
+management console that lets you manage them all. The action happens in microservices. etcd to
+bind everything together. What about that?
+- first, that's more interesting if the management console also manages docker
+- second, "etcd to bind everything together" depends on custom-built confd templates.
+	That's an integration tool, but not "readily integrated"
+- you still need docker, which an integrated solution could try to avoid
+- you still have independently running tomcat instances consuming lots of memory
+- this is a path already being tried by others, so it's less interesting
+
+Back to the original topic: A useful heuristic would be: If something is "application" in *some*
+use-case, then it's "application", period. Otherwise, it's "management". So managing templates is
+"application", because there is definitely a use-case in which non-ops would edit templates.
+Seeing data usage metrics on the templates database, on the other hand, is management. Ops people
+can still access application pages (1) through the application, the "regular" way, and (2) through
+iframes mounted in an "application GUI" section in the management console. This also keeps it clear
+that the management console is management, and not "the application". BTW, if someone wants to build
+"the application" using the server-blob, go for it -- but it's going to use different extension
+points, extensions, pages, etc. than the management console.
