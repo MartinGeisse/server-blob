@@ -18,7 +18,7 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Types;
 import name.martingeisse.serverblob.console.HomePage;
-import name.martingeisse.serverblob.console.wicket.page.AbstractApplicationPage;
+import name.martingeisse.serverblob.console.wicket.page.AbstractPage;
 
 /**
  * The Wicket {@link WebApplication} implementation.
@@ -145,7 +145,7 @@ public class MyWicketApplication extends WebApplication {
 				"glyphicons-halflings-regular.svg",
 			};
 			for (final String fontFile : bootstrapFontFiles) {
-				mountResource("/fonts/" + fontFile, new PackageResourceReference(AbstractApplicationPage.class, fontFile));
+				mountResource("/fonts/" + fontFile, new PackageResourceReference(AbstractPage.class, fontFile));
 			}
 		}
 

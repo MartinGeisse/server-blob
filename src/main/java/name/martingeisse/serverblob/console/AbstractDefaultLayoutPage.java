@@ -6,13 +6,13 @@
 
 package name.martingeisse.serverblob.console;
 
-import name.martingeisse.serverblob.console.wicket.page.AbstractApplicationPage;
+import name.martingeisse.serverblob.console.wicket.page.AbstractPage;
 
 /**
- * Extend this page instead of {@link AbstractApplicationPage} to get a {@link DefaultLayoutBorder}
+ * Extend this page instead of {@link AbstractPage} to get a {@link DefaultLayoutBorder}
  * for free. Just wrap the page contents in wicket:extend.
  */
-public abstract class AbstractDefaultLayoutPage extends AbstractApplicationPage {
+public abstract class AbstractDefaultLayoutPage extends AbstractPage {
 
 	/**
 	 * Constructor.

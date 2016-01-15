@@ -6,8 +6,6 @@
 
 package name.martingeisse.serverblob.console.configuration;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -15,11 +13,10 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import name.martingeisse.serverblob.console.AbstractDefaultLayoutPage;
-import name.martingeisse.serverblob.console.wicket.MyWicketApplication;
+import name.martingeisse.serverblob.dependency_injection.DependencyListModel;
 
 /**
  *
@@ -30,18 +27,7 @@ public class ConfigurationMainPage extends AbstractDefaultLayoutPage {
 	 * Constructor.
 	 */
 	public ConfigurationMainPage() {
-		final IModel<List<ConfigurationPageInfo>> infosModel = new AbstractReadOnlyModel<List<ConfigurationPageInfo>>() {
-
-			// override
-			@Override
-			public List<ConfigurationPageInfo> getObject() {
-				List<ConfigurationPageInfo> list = new ArrayList<>(MyWicketApplication.get().getDependencies(ConfigurationPageInfo.class));
-				Collections.sort(list, (x, y) -> x.getName().compareTo(y.getName()));
-				return list;
-
-			}
-
-		};
+		final IModel<List<ConfigurationPageInfo>> infosModel = new DependencyListModel<>(ConfigurationPageInfo.class, (x, y) -> x.getName().compareTo(y.getName()));
 		getLayoutBorder().add(new ListView<ConfigurationPageInfo>("links", infosModel) {
 			@Override
 			protected void populateItem(ListItem<ConfigurationPageInfo> item) {

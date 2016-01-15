@@ -24,12 +24,12 @@ import org.apache.wicket.resource.JQueryResourceReference;
  * Base class for all application pages. This class includes
  * the common stylesheets and Javascripts.
  */
-public class AbstractApplicationPage extends WebPage {
+public class AbstractPage extends WebPage {
 
 	/**
 	 * Constructor.
 	 */
-	public AbstractApplicationPage() {
+	public AbstractPage() {
 		super();
 	}
 
@@ -37,7 +37,7 @@ public class AbstractApplicationPage extends WebPage {
 	 * Constructor.
 	 * @param model the page model
 	 */
-	public AbstractApplicationPage(final IModel<?> model) {
+	public AbstractPage(final IModel<?> model) {
 		super(model);
 	}
 
@@ -45,7 +45,7 @@ public class AbstractApplicationPage extends WebPage {
 	 * Constructor.
 	 * @param parameters the page parameters
 	 */
-	public AbstractApplicationPage(final PageParameters parameters) {
+	public AbstractPage(final PageParameters parameters) {
 		super(parameters);
 	}
 
@@ -55,8 +55,8 @@ public class AbstractApplicationPage extends WebPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(new PriorityHeaderItem(CssHeaderItem.forReference(new CssResourceReference(AbstractApplicationPage.class, "common.css"))));
-		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(AbstractApplicationPage.class, "common.js"))));
+		response.render(new PriorityHeaderItem(CssHeaderItem.forReference(new CssResourceReference(AbstractPage.class, "common.css"))));
+		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(AbstractPage.class, "common.js"))));
 		markJavascriptAlreadyRendered(response, JQueryResourceReference.get());
 		markJavascriptAlreadyRendered(response, WicketAjaxJQueryResourceReference.get());
 		markJavascriptAlreadyRendered(response, WicketEventJQueryResourceReference.get());
