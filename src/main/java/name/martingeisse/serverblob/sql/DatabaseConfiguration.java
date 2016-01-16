@@ -6,6 +6,8 @@
 
 package name.martingeisse.serverblob.sql;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -34,8 +36,8 @@ public abstract class DatabaseConfiguration {
 		this.explicitPort = getOptionalInteger(configuration, sectionName + ".explicitPort");
 		this.databaseName = getRequired(configuration, sectionName + ".databaseName");
 		this.schemaName = configuration.get(sectionName + ".schemaName");
-		this.userName = getRequired(configuration, sectionName + ".schemaName");
-		this.password = getRequired(configuration, sectionName + ".schemaName");
+		this.userName = getRequired(configuration, sectionName + ".userName");
+		this.password = getRequired(configuration, sectionName + ".password");
 	}
 
 	private static String getRequired(final Map<String, String> configuration, final String key) {
@@ -114,4 +116,10 @@ public abstract class DatabaseConfiguration {
 		return password;
 	}
 
+	/**
+	 * @return a new database connection
+	 * @throws SQLException on errors
+	 */
+	public abstract Connection createConnection() throws SQLException;
+	
 }

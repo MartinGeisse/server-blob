@@ -42,14 +42,15 @@ public class FileConfigurationStore implements ConfigurationStore {
 		ImmutableMap<String, String> configuration = cache.get(key);
 		if (configuration == null) {
 			final Properties properties = new Properties();
+			final File file = getFile(key);
 			try {
-				try (FileInputStream in = new FileInputStream(getFile(key))) {
+				try (FileInputStream in = new FileInputStream(file)) {
 					try (InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
 						properties.load(reader);
 					}
 				}
 			} catch (final IOException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException("error while loading configuration file " + file.getAbsolutePath(), e);
 			}
 			@SuppressWarnings("unchecked")
 			final Map<String, String> map = (Map<String, String>)(Map<?, ?>)properties;

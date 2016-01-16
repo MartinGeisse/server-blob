@@ -16,6 +16,11 @@ import name.martingeisse.serverblob.dependency_injection.ExtensionPoint;
 public interface SqlDatabaseFamily {
 
 	/**
+	 * @return the name of this family
+	 */
+	public String getName();
+	
+	/**
 	 * Creates a database configuration from a configuration map by calling to appropriate constructor.
 	 * 
 	 * @param configuration the configuration map

@@ -17,6 +17,12 @@ public class MysqlDatabaseFamily implements SqlDatabaseFamily {
 
 	// override
 	@Override
+	public String getName() {
+		return "mysql";
+	}
+
+	// override
+	@Override
 	public DatabaseConfiguration newConfiguration(final Map<String, String> configuration, final String sectionName) {
 		return new MysqlDatabaseConfiguration(configuration, sectionName);
 	}

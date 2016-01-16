@@ -44,7 +44,9 @@ public class ApplicationModule extends AbstractModule {
 		}
 
 		// other bindings
-		bind(ConfigurationStore.class).toInstance(new FileConfigurationStore(new File("resource/configuration")));
+		// TODO for some stupid reason, Eclipse WTP changes the working directory to some weird place, so I have to use an absolute path here...
+		// bind(ConfigurationStore.class).toInstance(new FileConfigurationStore(new File("resource/configuration")));
+		bind(ConfigurationStore.class).toInstance(new FileConfigurationStore(new File("/Users/martin/workspace/server-blob/resource/configuration")));
 		
 	}
 

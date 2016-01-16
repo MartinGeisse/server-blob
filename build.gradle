@@ -92,4 +92,7 @@ dependencies {
 	// awesome-wicket-components
 	compile project(':awesome-wicket-components')
 
+	// databases
+	compile 'mysql:mysql-connector-java:5.1.38'
+
 }

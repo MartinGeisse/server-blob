@@ -6,10 +6,16 @@
 
 package name.martingeisse.serverblob.sql;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import name.martingeisse.serverblob.configuration.ConfigurationStore;
 
@@ -21,39 +27,75 @@ import name.martingeisse.serverblob.configuration.ConfigurationStore;
  */
 public class SqlService {
 
+	private final Map<String, DatabaseConfiguration> configurations = new HashMap<>();
+
 	/**
 	 * Constructor.
+	 * @param families the database families
 	 * @param configurationStore the configuration store
 	 */
 	@Inject
-	public SqlService(final ConfigurationStore configurationStore) {
-		
+	public SqlService(final Set<SqlDatabaseFamily> families, final ConfigurationStore configurationStore) {
+
+		// map database families by name
+		final Map<String, SqlDatabaseFamily> familiesByName = families.stream().collect(Collectors.toMap(SqlDatabaseFamily::getName, Function.identity()));
+
 		// load configuration
-		ImmutableMap<String, String> configuration = configurationStore.getConfiguration(SqlService.class);
-		
+		final ImmutableMap<String, String> configuration = configurationStore.getConfiguration(SqlService.class);
+
 		// determine database IDs
-		Set<String> ids = new HashSet<>();
-		for (Map.Entry<String, String> entry : configuration.entrySet()) {
-			String key = entry.getKey();
-			int index = key.indexOf('.');
+		final Set<String> ids = new HashSet<>();
+		for (final Map.Entry<String, String> entry : configuration.entrySet()) {
+			final String key = entry.getKey();
+			final int index = key.indexOf('.');
 			if (index < 0) {
 				continue;
 			}
 			ids.add(key.substring(0, index));
 		}
-		
+
 		// extract database configurations
-		for (String id : ids) {
-			String databaseFamilyName = configuration.get(id + ".family");
+		for (final String id : ids) {
+			final String databaseFamilyName = configuration.get(id + ".family");
 			if (databaseFamilyName == null) {
 				throw new RuntimeException("missing database family property: " + id + ".family");
 			}
-			// TODO determine family
-			SqlDatabaseFamily databaseFamily = null;
-			DatabaseConfiguration databaseConfiguration = databaseFamily.newConfiguration(configuration, id);
-			// TODO create connector
+			final SqlDatabaseFamily databaseFamily = familiesByName.get(databaseFamilyName);
+			if (databaseFamily == null) {
+				throw new RuntimeException("invalid SQL database family name: " + databaseFamilyName);
+			}
+			final DatabaseConfiguration databaseConfiguration = databaseFamily.newConfiguration(configuration, id);
+			configurations.put(id, databaseConfiguration);
 		}
-			
+
 	}
 
+	/**
+	 * @return all database IDs
+	 */
+	public ImmutableSet<String> getDatabaseIds() {
+		return ImmutableSet.copyOf(configurations.keySet());
+	}
+
+	/**
+	 * @param databaseId the database ID
+	 * @return the configuration, or null if unknown
+	 */
+	public DatabaseConfiguration getDatabaseConfiguration(String databaseId) {
+		return configurations.get(databaseId);
+	}
+	
+	/**
+	 * @param databaseId the database ID
+	 * @return the new connection
+	 * @throws SQLException on errors
+	 */
+	public Connection createConnection(String databaseId) throws SQLException {
+		DatabaseConfiguration configuration = configurations.get(databaseId);
+		if (configuration == null) {
+			throw new IllegalArgumentException("invalid database ID: " + databaseId);
+		}
+		return configuration.createConnection();
+	}
+	
 }

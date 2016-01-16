@@ -1,0 +1,6 @@
+main.family=mysql
+main.displayName=Main
+main.hostName=localhost
+main.databaseName=main
+main.userName=root
+main.password=
