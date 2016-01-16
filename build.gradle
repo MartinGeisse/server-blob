@@ -43,6 +43,14 @@ eclipse {
 	}
 }
 
+sourceSets {
+	main {
+		java {
+			srcDir 'src/main/generated'
+		}
+	}
+}
+
 repositories {
 	mavenCentral()
 }
@@ -94,5 +102,8 @@ dependencies {
 
 	// databases
 	compile 'mysql:mysql-connector-java:5.1.38'
+
+	// template engine
+	compile 'com.lyncode:jtwig-core:3.1.1'
 
 }
