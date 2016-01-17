@@ -1,0 +1,5 @@
+
+keyComponent = stdform.addTextField("Key", "key").setRequired().getFormComponent();
+-->
+Get component from component hierarchy via path. Maybe add a method to the form class to do that.
+Alternatively, store the last created components in the DecoratorBuilder and provide getters for them.

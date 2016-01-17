@@ -102,6 +102,8 @@ dependencies {
 
 	// databases
 	compile 'mysql:mysql-connector-java:5.1.38'
+	compile 'com.querydsl:querydsl-sql:4.0.7'
+	compile 'com.querydsl:querydsl-sql-codegen:4.0.7'
 
 	// template engine
 	compile 'com.lyncode:jtwig-core:3.1.1'
