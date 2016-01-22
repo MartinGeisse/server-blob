@@ -117,9 +117,19 @@ public abstract class DatabaseConfiguration {
 	}
 
 	/**
+	 * Creates a new JDBC connection. The caller is responsible for closing the connection.
+	 * 
 	 * @return a new database connection
 	 * @throws SQLException on errors
 	 */
 	public abstract Connection createConnection() throws SQLException;
-	
+
+	/**
+	 * Creates a QueryDSL query factory. The caller is responsible for closing the query factory.
+	 * 
+	 * @return a new query factory
+	 * @throws SQLException on errors
+	 */
+	public abstract CloseableSqlQueryFactory<?> createQueryFactory() throws SQLException;
+
 }

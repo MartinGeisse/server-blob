@@ -86,8 +86,10 @@ public class SqlService {
 	}
 	
 	/**
+	 * Creates a new JDBC connection. The caller is responsible for closing the connection.
+	 * 
 	 * @param databaseId the database ID
-	 * @return the new connection
+	 * @return a new database connection
 	 * @throws SQLException on errors
 	 */
 	public Connection createConnection(String databaseId) throws SQLException {
@@ -97,5 +99,20 @@ public class SqlService {
 		}
 		return configuration.createConnection();
 	}
-	
+
+	/**
+	 * Creates a QueryDSL query factory. The caller is responsible for closing the query factory.
+	 * 
+	 * @param databaseId the database ID
+	 * @return a new query factory
+	 * @throws SQLException on errors
+	 */
+	public CloseableSqlQueryFactory<?> createQueryFactory(String databaseId) throws SQLException {
+		DatabaseConfiguration configuration = configurations.get(databaseId);
+		if (configuration == null) {
+			throw new IllegalArgumentException("invalid database ID: " + databaseId);
+		}
+		return configuration.createQueryFactory();
+	}
+
 }

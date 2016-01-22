@@ -1,0 +1,13 @@
+
+send JSON "program" to the request bot
+it will send requests (serial or in parallel, depending on the program)
+with varying parameters (depending on the program)
+the number of requests is specified statically or determined by the responses
+	(e.g. less results than expected); discarding parallel requests "after"
+	the end condition (Note: they might have caused side effects on the server)
+responses get merged using a merge algorithm specified in the "program",
+	e.g. concatenate response bodies byte-wise or character-wise
+	e.g. concatenate JSON arrays, also wrapped arrays
+	e.g. concatenate XML array-like structures
+post-process partial or final response,
+	e.g. remove JSON fields the caller doesn't need, to reduce size

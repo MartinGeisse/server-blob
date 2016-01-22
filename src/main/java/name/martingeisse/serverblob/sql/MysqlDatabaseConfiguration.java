@@ -49,5 +49,11 @@ public class MysqlDatabaseConfiguration extends DatabaseConfiguration {
 	public Connection createConnection() throws SQLException {
 		return DriverManager.getConnection(url, getUserName(), getPassword());
 	}
+	
+	// override
+	@Override
+	public CloseableSqlQueryFactory<?> createQueryFactory() throws SQLException {
+		return new CloseableMySQLQueryFactory(createConnection());
+	}
 
 }
