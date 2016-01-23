@@ -43,7 +43,21 @@ Validator:
 	validator can be used to enforce that inserted documents have certain user-expected
 	properties.
 
+Input Transformers:
+- run for inserted / replaced documents *before* validation
+- may change these documents, e.g. resize images, change image quality and remove color profile;
+	change text encoding; change document format (images, text documents, ...); interpolate
+	missing fields in JSON documents
+
 Observations:
 - property namespace and annotation namespace are distinct
 	- rationale: If not distinct, defining a new property would require to scan all
 		documents for colliding annotations
+
+Implementation:
+- some off-the-shelf DB for storage, e.g. Cassandra
+- Elasticsearch for searching (maybe even for storage)
+
+User Interface:
+- provide simple UI for common use cases
+- UI relies on "Content-Type" property for displaying
