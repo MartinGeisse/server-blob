@@ -1,0 +1,49 @@
+
+Bucket: Root object; authorization starts / happens here
+Documents can be inserted into a bucket.
+The document storage doesn't need any further information when inserting.
+
+Properties:
+- user defines properties per bucket, each consisting of
+	- a name
+	- a precondition
+	- an extractor
+- the data type for properties has to be defined; in doubt, string or JSON
+- the name must be unique among all properties in the bucket
+- each document that satisfies the precondition "has" the property
+- the extractor produces a value for each document that has the property
+	- the extractor may take annotations (see below) into account
+- the extractor is re-run when the document or its annotations change
+	- an extractor may be skipped if a property changed that wasn't read
+		by the extractor last time it ran
+	- re-running is implemented to be correct except for user-defined extractors
+		that rely on external state; for these, no correct automatic re-run
+		policy can be determined
+		- extractors relying on external state should be avoided if possible
+		- getting the value of such a property will block until the extractor is finished 
+- extractors can be forced to re-run (for one/all properties and one/all documents)
+- users can get the property value but not set it -- it's derived automatically
+
+Annotations:
+- user defines annotations per document, each consisting of
+	- a name
+	- a value
+- the data type for annotations has to be defined; in doubt, string or JSON
+- the name must be unique among all annotations for the document
+
+Validator:
+- user defines validators per bucket, each consisting of
+	- a precondition
+	- a validity condition
+- the precondition doesn't play a special role as for properties, except for presentation
+	purposes. For validation, the combined rule is (!precondition || valid)
+- any operation that results in a document with failed validators is cancelled by the database
+	and returns a corresponding error message to the caller
+- like for properties, the validator may take annotations into account. Especially, a
+	validator can be used to enforce that inserted documents have certain user-expected
+	properties.
+
+Observations:
+- property namespace and annotation namespace are distinct
+	- rationale: If not distinct, defining a new property would require to scan all
+		documents for colliding annotations
