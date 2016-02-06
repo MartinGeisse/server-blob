@@ -23,7 +23,7 @@ public class ApplicationPagesReferencePage extends AbstractDefaultLayoutPage {
 	 * Constructor.
 	 */
 	public ApplicationPagesReferencePage() {
-		getLayoutBorder().add(new ListView<ApplicationPages>("sections", new DependencyListModel<>(ApplicationPages.class)) {
+		getLayoutBorder().add(new ListView<ApplicationPages>("sections", new DependencyListModel<>(ApplicationPages.class, ApplicationPages::getName)) {
 			@Override
 			protected void populateItem(ListItem<ApplicationPages> item) {
 				item.add(new Label("name", new PropertyModel<>(item.getModel(), "name")));

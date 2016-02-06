@@ -4,9 +4,11 @@
 			<h2>Databases</h2>
 			<div wicket:id="databases">
 				<h3><span wicket:id="displayName" /> (id: <span wicket:id="id" />)</h3>
-				<div wicket:id="tables">
-					<h4 wicket:id="name"></h4>
-				</div>
+				<ul>
+					<li wicket:id="tables">
+						<span wicket:id="name" /> <span wicket:id="toolLinks"><a wicket:id="toolLink"><span wicket:id="displayName" /></a></span>
+					</li>
+				</ul>
 			</div>
 		</wicket:extend>
 	</body>
