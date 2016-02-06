@@ -30,6 +30,16 @@ public class ApplicationModule extends AbstractModule {
 		Set<Class<?>> extensionPoints = reflections.getTypesAnnotatedWith(ExtensionPoint.class);
 		Set<Class<?>> extensions = reflections.getTypesAnnotatedWith(Extension.class);
 		
+		/*
+		 * TODO scanning everything for Es and EPs takes some time. This is one reason why
+		 * explicit "plugin" objects that return the extensions and extension points are
+		 * an improvement over annotation-based scanning. Are there other arguments pro/con?
+		 * 
+		 * pro annotations: makes things more modular.
+		 * 
+		 * con plugin objects: These need to be discovered too.
+		 */
+		
 		// collect extension points and build a map using them as keys
 		Map<Class<?>, Multibinder<?>> binderMap = new HashMap<>();
 		for (Class<?> extensionPoint : extensionPoints) {

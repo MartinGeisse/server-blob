@@ -27,6 +27,11 @@ import name.martingeisse.serverblob.configuration.ConfigurationStore;
  */
 public class SqlService {
 
+	/**
+	 * The database ID used for the blob's internal database.
+	 */
+	public static final String BLOB_DATABASE_ID = "blob";
+	
 	private final Map<String, DatabaseConfiguration> configurations = new HashMap<>();
 
 	/**
@@ -84,6 +89,15 @@ public class SqlService {
 	public DatabaseConfiguration getDatabaseConfiguration(String databaseId) {
 		return configurations.get(databaseId);
 	}
+
+	/**
+	 * This method is equivalent to getDatabaseConfiguration(BLOB_DATABASE_ID).
+	 * 
+	 * @return the blob's internal database configuration, or null if the internal database is not configured
+	 */
+	public DatabaseConfiguration getBlobDatabaseConfiguration() {
+		return getDatabaseConfiguration(BLOB_DATABASE_ID);
+	}
 	
 	/**
 	 * Creates a new JDBC connection. The caller is responsible for closing the connection.
@@ -99,6 +113,16 @@ public class SqlService {
 		}
 		return configuration.createConnection();
 	}
+	
+	/**
+	 * This method is equivalent to createConnection(BLOB_DATABASE_ID).
+	 * 
+	 * @return a new database connection to the blob's internal database
+	 * @throws SQLException on errors
+	 */
+	public Connection createConnection() throws SQLException {
+		return createConnection(BLOB_DATABASE_ID);
+	}
 
 	/**
 	 * Creates a QueryDSL query factory. The caller is responsible for closing the query factory.
@@ -113,6 +137,16 @@ public class SqlService {
 			throw new IllegalArgumentException("invalid database ID: " + databaseId);
 		}
 		return configuration.createQueryFactory();
+	}
+	
+	/**
+	 * This method is equivalent to createQueryFactory(BLOB_DATABASE_ID).
+	 * 
+	 * @return a new query factory for the blob's internal database
+	 * @throws SQLException on errors
+	 */
+	public CloseableSqlQueryFactory<?> createQueryFactory() throws SQLException {
+		return createQueryFactory(BLOB_DATABASE_ID);
 	}
 
 }

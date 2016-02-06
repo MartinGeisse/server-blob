@@ -4,7 +4,11 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	id="WebApp_ID" version="3.0"
 	metadata-complete="true">
+	
 	<!-- note: metadata-complete="true" means that library JAR files won't be scanned for servlet annotations, but the application code *will* be scanned. -->
+	
+	<!-- this is needed to prevent other scanning -->
+	<absolute-ordering />
 
 	<display-name>Server-Blob</display-name>
 	<listener>

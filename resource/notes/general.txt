@@ -1,0 +1,299 @@
+
+Das ganze Konzept steht in Konflikt mit Microservices. Die Frage ist: Was soll eigentlich erreicht werden?
+
+- soll hier eine Grundlage für "alle möglichen Module" geschaffen werden, so dass man einen Großteil einer
+	Anwendung aus Plugins zusammenbauen kann, bevor man auch nur eine Zeile Code schreibt?
+	- wäre selbst ein Monolith und damit nicht dem Microservice-Konzept entsprechend
+	- würde aber den Aufbau von Microservices "außenrum" nicht verhindern
+	
+- oder soll hier eine "generische Management-Console" geschaffen werden, also nur ein kleiner Teil von o.g.?
+	- würde sich gut mit Microservices vertragen
+	- aber man könnte eben nicht mehr ruck-zuck eine halbe Anwendung herzaubern
+
+Versuch, allen Seiten gerecht zu werden:
+- Docker o.ä. als Grundlage 
+- Microservices, d.h. die Console ist nur eine Console und läuft als Docker-Container
+- zusätzlich ein oder mehrere Container je Service
+- die Console managed die Services
+- die Services müssten dann "einfach dem Cluster hinzugefügt werden können"
+- die Services müssten dann "einfach von der Console umconfiguriert werden können"
+	- das ginge per etcd, aber da sind noch viele Fragen offen
+- Vorteil: ein einzelner Service oder z.B. die Console können redeployed werden, ohne
+	dass das mit allen Services passieren muss. Der "professionelle" Weg, einen neuen
+	Rechner hochzufahren, im LB umzuhängen und dann den alten runterzufahren, ist in
+	den meisten Situationen auch nicht "einfach".
+- Vorteil: Kapselung. Ein Service kann nicht ohne weiteres einen anderen Service
+	zerschießen. Außerdem wird von vornherein verhindert, dass ein Service direkt auf
+	die DB eines anderen Service zugreift. Das darf allerhöchstens die Console, und
+	der Sys-Op hat die Kontrolle, wann es passiert (Firewall, Netzwerkregeln etc).
+- Nachteil: komplizierte Konfiguration auf Netzwerk / Cluster-Ebene nötig, bis alles
+	läuft. Danach gehts vom Aufwand her (alles über Console)
+	- aber: Auch mit einem Monolith müssen Datenbanken konfiguriert werden.
+
+Grundidee für eine generische Management-Console:
+- Service liefert ein Modell von sich selbst (oder es wird in der Console hinterlegt,
+	falls ein Service das nicht kann)
+- notfalls wird die GUI in der Console nachkonfiguriert. Der Service bestimmt nicht
+	direkt die GUI, nur indirekt über das Modell, und da sind keine GUI-Angaben drin,
+	nur Meta-Infos über den Service.
+	
+---------------------------------------------------------------------------------------------------
+
+Die ganze Diskussion "Microservices ja oder nein" wird durch Kubernetes umgekrempelt. Damit werden
+Services automatisch vernetzt und optional auch konfiguriert. Letzteres kann man noch toppen, indem
+die Kubernetes-Config benutzt wird, um die "richtigen" Werte auch einem automatisch "drangenetzten"
+etcd zu ziehen. IP-/Port-/DNS-Config wird automatisch verwaltet, ebenso wie viele Container mit welchem
+Image auf welchem Host laufen. Für das Verteilen von DB-Secrets gibt es separate Konzepte, um
+diese zu schützen. Auch die DB müsste automatisch "drangenetzt" werden.
+
+Damit ist klar, dass o.g. Projekt auf Docker, und soweit nicht ausdrücklich vom User abgelehnt auch
+Kubernetes, aufsetzen sollte. Es geht also nicht mehr um die "Automatik", sondern darum,
+- Standards zu setzen, um die einzelnen Services ohne große Schmerzen zu Deployen:
+	- soweit nötig Standard-Kubernetes-Annotations, wo die Configs hergezogen werden
+	- etcd-Keys, wo weitere Konfiguration hinterlegt wird
+- Eine Management-Console zu schaffen, welche die Services auf Ops-Ebene zusammenbindet
+	- Monitoring
+	- Editieren der etcd-Konfig
+- Standard-Services zu schaffen und zu integrieren, aus denen man einen Großteil einer Anwendung
+	zusammenpuzzeln kann
+	- diese Services dürfen gerne auch "groß" sein, solange sie "rund" sind und sich je nach Anwendungsgebiet
+		per Konfiguration "verkleinern" lassen. Meiner Vermutung nach wird eine Standardisierung
+		dieser Dienste dann auch wirklich Komplexität aus der Anwendung extrahieren, ohne sie in die
+		Orchestrierung zu verschieben.Die Standardisierung geht leichter, wenn die Services mehr tun,
+		als sie im konkreten Anwendungsfall tun müssen, um dann aber mehr als einen Anwendungsfall
+		abzudecken und sich jeweils per Konfiguration "schrumpfen" lassen. 
+		 
+---------------------------------------------------------------------------------------------------
+
+Ich bin nicht mehr so sicher, dass Kubernetes wirklich "sein muss". Eher sieht es danach aus, als
+sollten die einzelnen Microservices durch geeignete, *Kubernetes-kompatible* Mechanismen vernetzbar
+sein -- die aber genausogut auch manuell benutzt werden können.
+
+Andererseits hätte das natürlich das Problem, dass das "default-Verhalten" ohne Kubernetes vieles
+nicht kann... stimmt das?
+- Autoscaling & LB: Man kann immer noch auf jeder physischen Maschine sämtliche Container installieren;
+	diese erzeugt ohne Last keine Systemlast. Man müsste sie nur einmaling manuell vernetzen,
+	und dann nochmal, wenn die physische Serverwelt sich verändert. Dazu reichen entsprechende
+	Metadaten beim Container-Erzeugen. In der Praxis würde sich ein Admin ein Script schreiben,
+	um auf einem (neuen oder rebooteten) physischen Server sämtliche Container mit der richtigen
+	Config zu starten.
+- Je nachdem, wie ETCD ins Gesamtbild passt, müsste man jedem Container nur die ETCD-Adresse,
+	Credentials und Basispfad geben, damit er sich die Konfiguration ziehen kann.
+- Allerdings macht es immernoch am meisten Sinn, dass bei grundlegenden Konfigurations-Änderungen
+	die Dienste restarten, statt die Config "live" zu aktualisieren. Grundsätzlich geht das mit
+	Docker ja recht gut, aber es ist trotzdem viel manueller Aufwand.
+- Einfacher ginge es, wenn Docker *gesteuert* wird. Das wird aber vermutlich dazu führen, dass im
+	Blob-System ein Teil (Großteil?) von Kubernetes nachprogrammiert wird. Reduziert wird
+	dieser Aufwand dadurch, dass man nicht mit beliebigen Containern arbeiten muss, sondern nur
+	mit solchen, die bestimmte Auflagen erfüllen. Ansonsten könnte man wirklich gleich Kubernetes
+	nehmen.
+- Dann hätte man auf den einzelnen Maschinen jeweils einen Steuer-Prozess laufen, welcher die anderen
+	Container startet und stoppt. Auf einer neuen / rebooteten physischen Maschine müsste man
+	diesen starten (wobei die Verbindung zum ETCD hergestellt wird); andere Container werden von
+	diesem gestartet und gestoppt und bekommen dadurch Konfigurationsdaten, ETCD-Verbindung usw.
+	mitgeteilt. Voraussetzung ist nur, dass der Steuercontainer die Berechtigung dazu hat, Docker
+	zu steuern, aber das ist bei Kubernetes auch nicht anders ("run as privileged container;
+	docker run --privileged", oder aber Zugriff auf einzelne Host-System-Scripte, die die
+	Container verwalten).
+- Wenn die Dienste derart "klein" und isoliert sind, macht evtl. Jetty statt Tomcat Sinn
+
+Wenn ich auf diese Art und Weise Kubernetes umgehe, was mache ich dann grundsätzlich anders als
+mit Kubernetes? Meiner Meinung nach mache ich anders, dass ich für Blob-Plugins extrem strenge
+Vorgaben mache, statt beliebige vom Benutzer geschriebene Dienste zu verwalten. Das passt dazu,
+dass der "Blob" eine fertige, nur noch konfigurierbare Anwendung ist, mit der man große
+Aufgabenbereiche mit wenig Arbeit abdeckt -- statt eines "Frameworks" für den eigenen Code. 
+
+---------------------------------------------------------------------------------------------------
+
+Was müsste man konkret selbst machen, wenn man Kubernetes nicht benutzt?
+- scaling, also neue Container hochfahren, um die Kapazität zu vergrößern
+- Container mit bestimmten Images hochfahren, nämlich mit dem Image des Service, der mehr
+	Kapazität benötigt. Das ist Aufwändig. Um ein kompliziertes Packetverwaltungssystem
+	zu vermeiden, und stattdessen das von Docker zu verwenden, ist das aber nötig. 
+- Ressourcenlimits per Docker verwalten
+	- das ist nicht so schlimm -- wenn man Kubernetes schon nicht benutzt und auch kein eigenes
+		System zur Verwaltung der Limits schon geschaffen hat, dann sind einem die Limits
+		höchstwahrscheinlich nicht so wichtig (typisch für "kleine" Systeme)
+- Konfiguration beim Starten übergeben
+	- Versuch 1, das durch ETCD zu entschärfen:
+		- Man legt auf dem Master (und damit im ETCD) Service-Instanzen (besserer Begriff nötig)
+			an. Jede Service-Instanz entspricht einem ETCD-Basispfad und damit einer Konfiguration
+			im ETCD (vllt ist Konfiguration ein besserer Begriff)
+		- Beim Hochfahren eines Service-Containers gibt man den Basispfad an. Dadurch zieht sich
+			dieser die entsprechende Konfiguration.
+		- Nachteil: Das animiert dazu, Konfigurationsänderungen durch live-reload statt restart
+			zu lösen, weil ein restart unnötig kompliziert ist.
+			-> Lösung: restart != container-restart. Es muss nur der Prozess innerhalb vom
+				Container restarten.
+		- Pluspunkt: Man kann in der Management-Console anzeigen, wie viele Container aktuell zu
+			einer Configuration laufen
+				- wie enforced man, dass die sich melden?
+					- nur indem "trusted" code in den Service-Containern läuft
+				- ähnliches Problem: Wie funzt Load Balancing, wenn mehrere Container zu einem
+					Service laufen? Beispiel Template-Engine?
+					- wenn sich ein Container in einem LB meldet, dann ist er auch bekannt und kann
+						in der Management Console gezeigt werden
+		- Pluspunkt: Man kann in der Management-Console die nötigen Befehle zeigen, um einen
+			Container zu starten
+
+Anderer Gedanke: Durch die strikte Trennung in Microservices ist es auch nur schwer möglich, die GUI
+der Management-Console durch Plugins zu erweitern -- da es für solche Plugins gar kein Deployment gibt.
+Man würde einen zusätzlichen Service per Docker installieren und starten, aber in der Console kann
+dadurch erst mal nur der neue laufende Service angezeigt werden, aber z.B. noch keine neuartigen Widgets.
+--> Das ist ein grundsätzliches Problem mit Microservices und hat nichts mit Kubernetes zu tun.
+
+Load Balancing "von außen", also z.B. Application-Pages, ist kein Problem für "den Blob", weder als
+Monolith noch als MS mit oder ohne K. Das muss oben drauf gesetzt werden.
+
+Load Balancing "von innen" ist interessanter. Als Monolith ist das die Kommunikation innerhalb einer JVM,
+was allerdings impliziert, dass immer "nach localhost" verbunden wird. Das kann auch Lastprobleme
+verursachen, weil intern weitergegebene Arbeit immer auf demselben Node erledigt werden muss, wo sie
+auch entsteht. Mit Kubernetes würde ebendieses das LB auch erledigen. Ohne K wirds interessant -- wie
+erreicht denn ein Modul *überhaupt* andere Module?
+
+Was genau bietet der "Blob" denn eigentlich (ohne, dass Kubernetes eingesetzt wird)?
+- Protokoll-Standard, um sich mit der Console zu verbinden
+- Protokoll-Standard für Logging, Monitoring, Alarme
+- Standard-Module "für alles"
+
+Was ginge mit Kubernetes zusammen?
+- nicht nur Protokoll-Standards, sondern auch automatische Vernetzung
+
+Was könnte der "Blob" als Monolith bieten?
+- nicht nur Protokoll-Standards, sondern auch automatische Vernetzung
+
+---------------------------------------------------------------------------------------------------
+
+Die Möglichkeit, den Blob in jedem x-beliebigen Kontext zu starten, macht ihn dafür auch in jedem
+Kontext kompliziert. Entweder muss ich mich auf einen Kontext festlegen (reduziert die Benutzeranzahl),
+oder etwas simples muss her, was sich durch seine Einfachheit auch anpassen lässt. Variante 3 wäre,
+nicht einen *anpassungsfähigen* Blob zu schreiben, sondern *angepasste* Blobs zu schreiben. Also,
+dass man per Blob-Plugin die Angepasstheit an Docker, Kubernetes oder sonstwas herstellen kann.
+
+Diese Plugins würden handeln:
+- Vernetzung
+- internes Load Balancing
+- (nicht: externes LB. Das kann nur ein separater LB, oder aber LB-code auf den clients; ersteres könnte
+	wieder ein Blob-Modul sein und letzeres könnte durch Kubernetes gestellt werden)
+- Konfigurations-Verteilung (mit / ohne ETCD)
+
+Vermutlich macht es die Dinge einfcher und noch anpassungsfähiger, wenn man diese einzelnen Entscheidungen
+unabhängig voneinander treffen kann. Das würde auch die Migration auf ein anderes Setup stark vereinfachen,
+weil man z.B. prozess-interne Vernetzung in einem Monolith ersetzen könnte durch auto-Vernetzung, die
+"zufällig" immer nach localhost geht.
+
+Idee wäre: Ein "Microservice" ist ein Monolith, wo nur ein Service drauf läuft. Die sonstige Architektur
+wäre dieselbe. 
+
+Was wären die verschiedenen Kontexte?
+- Blob als blanker Prozess auf einem Server
+- Blob als blanker Prozess auf mehreren Servern
+- Blob als monolithischer Container auf einem Server
+- Blob als monolithischer Container auf mehreren Servern
+- Blob als mehrere Microservice-Container auf einem Server
+- Blob als mehrere Microservice-Container auf mehreren Servern
+- Blob als monolithischer Service unter Kubernetes
+- Blob als mehrere Microservice-Services unter Kubernetes
+
+Was könnte dann durch Plugins erledigt werden (EPs) und welche Implementierungen (Es) gäbe es?
+- Vernetzung zu anderen Blob-Nodes:
+	- macht nur Sinn, wenn es Blob-Nodes (Monolithen) gibt
+- Vernetzung zu einzelnen Services:
+	- prozessintern
+	- localhost (Port muss noch bestimmt werden)
+	- über Vernetzung zu Blob-Nodes (Monolithen)
+	- Adressen werden von den Services im ETCD hinterlegt
+	- Adressen werden von den Services in einem Master bekanntgegeben
+	- Umgebungsvariablen (z.B. Kubernetes)
+- internes LB:
+	- Die Vernetzung liefert eine Liste von Service-Nodes, also muss hier nur noch entschieden
+		werden, zu welcher man sich connected. In vielen Fällen hat diese Liste nur einen Eintrag
+		(prozessintern, localhost, Kubernetes)
+	- Nur wenn das Vernetzungs-Plugin sagt, dass die Liste >1 Eintrag haben kann, sollte das
+		interne LB überhaupt konfigurierbar sein
+	- fürs erste reicht hier sogar "random"
+- Scaling:
+	- ein entsprechendes Plugin ergänzt das starten / stoppen von Docker-Containern. Dieser Service
+		(bei Monolith: der Blob) muss dann als privileged laufen
+	- dasselbe gibt es dann nochmal für die Verwaltung von Kubernetes
+- sollen Services durch Neustart eine neue Konfiguration holen?
+	- das macht den Code einfacher, hat aber auch einige Nachteile, selbst wenn es gut funktioniert:
+		- langlaufende Requests dürfen nicht vom Restart unterbrochen werden
+		- Caches werden geleert (wobei das gut sein kann, weil sie durch die Änderung invalid werden)
+	- dies ist eine Grundsätzliche Entscheidung und kann nicht einfach durch ein Plugin entschieden
+		werden. Es ist eine Entscheidung über die Architektur des Plugin-Systems.
+- Konfiguration ändern
+	- eher: Wo wird die Konfiguration gespeichert. Je nach Speicherort und Konfiguration der Console
+		entscheidet sich dann, ob man darüber die Konfiguration auch ändern kann
+	- Umgebungsvariablen; Command Line Parameters:
+		- nur mit Restart der Services Änderbar, und nur, wenn der Blob das Starten / Stoppen von
+			Containern selbst erledigt
+	- ETCD: Configuration kann grundsätzlich über die Console geändert werden
+
+Probleme:
+- Wenn man sich für einen Monolithen entscheidet, fällt Docker als Package Manager weg, d.h. man hat
+	dann gar keinen mehr.
+	- der Blob würde mit den Standard-Plugins ausgeliefert, ggf. auch als Monolith-Docker-Image
+	- Nonstandard Services kann man immer noch per Docker dransetzen (dann kein Monolith mehr)
+		oder mit dem System-Nativen Package Manager
+- Wenn ein Service als Microservice oder als Teil eines Monolithen laufen kann, dann kann nicht mehr
+	einfach ein Service per Extension an einen Extension Point eines anderen Service gehen
+	- Das ist ein wirklich interessanter Aspekt, weil hier nämlich die maximale Integration des
+		EP/E-Systems mit der Trennung von Docker/Microservices kollidiert. Generell stellt sich hier
+		die Frage: Wie kann man einen (Micro-)Service getrennt neu deployen, wenn er gleichzeitig
+		Extensions für einen anderen (Micro-)Service bereitstellt? Sollen diese dann auch neu deployed
+		werden oder nicht? Oder sollen sie neu Deployed werden, wenn der *andere* Service neu deployed
+		wird? Was soll passieren, wenn ein Service neu dazu kommt, der Extensions für bestehende
+		Services bereitstellt?
+
+Letzteres führt mich zu der Erkenntnis: Entweder, der Blob wird als Monolith designed, oder es muss
+grundsätzlich ein Konzept her, wie ein Microservice A einen anderen Microservice B "extenden" kann.
+Das könnte zum Beispiel über Javascript-Snippets gehen, die von A nach B gesendet und dort integriert
+werden. Es muss aber auch restarts, upgrades usw. von A handlen können, ohne dass z.B. events auf
+B-Seite verloren gehen.
+
+Wie machen andere das? Die betrachten die Extension auf B-Seite als ein eigenes, von A unabhängiges
+Projekt und deployen sie auch separat. Ist mehr Aufwand, aber möglich. Die grundsätzliche Idee, einen
+Großteil der Anwendung aus fertigen Komponenten zusammenzubauen, wird dadurch nicht zunichte gemacht,
+allerdings wird sie gestört. Jede Komponente ist ein erneuter Aufwand, der ein Hindernis darstellt.
+Auch gibt es erst mal keinen Deploy-Mechanismus für die Extensions -- der System-Paketmanager könnte
+das tun, aber mit Docker wird es schon schwierig.
+
+---------------------------------------------------------------------------------------------------
+
+Neuer Ansatz:
+Die einzelnen Komponenten bekommen *keine* Extensions. Dadurch können sie problemlos als Docker-Container
+gestartet werden. Außerdem handlen sie auch nicht die ganzen o.g. offenen Fragen. Stattdessen werden
+die Vernetzung, Konfiguration, Extensions, Glue Code, whatever als separate Services (z.B. weitere
+Docker-Container) gestartet und binden die Services zusammen. Klingt erst mal genau wie das, was Kubernetes
+auch tut, allerdings mit strikten Standards, an die die Komponenten sich halten müssen. Es soll ein
+Framework sein, andererseits soll der Anwendungs-Entwickler auch gar nicht innerhalb dieses Frameworks
+arbeiten, sondern nur die Komponenten-Entwickler.
+
+Funktioniert das? Kann damit z.B. der Admin ein Plugin installieren, um die Template-Engine um eine weitere
+Template-Sprache zu erweitern?
+
+Ich komme so langsam zu dem Schluß, dass der Monolith die einzige Möglichkeit ist, den Blob umzusetzen.
+Zumindest die einzige Möglichkeit, die sich mir erschließt. Was spricht gegen einen Monolithen?
+- Trennung:
+	- Man kann einzelne Services nicht getrennt neu deployen.
+	- Wenn ein Service Mist baut, sind alle Services betroffen.
+	- Kein Schutz gegenüber einem bösartigen Plugin (war aber bisher auch noch nicht auf dem Schirm)
+	->
+	- das ist dann halt so
+	- wenn man Trennung will, kann man zwei oder mehr getrennte Monolithen aufsetzen, die sich dann
+		aber auch wie getrennte Systeme verhalten
+	- die Trennung liegt dann im Entscheidungsbereich des Admins
+	- die Trennung lässt sich per Kubernetes automatisieren (Pluspunkt!)
+		- allerdings arbeiten getrennte Services dann auch nur noch bedingt zusammen
+			- was sich aber mit Kubernetes wieder automatisieren lässt
+				- Voraussetzung ist, dass die Vernetzung per Umgebungsvariable definiert werden kann, was OK ist
+
+Dann wäre das Gesamtbild: Der Blob ist ein konfigurierbarer Monolith. Man kann ihn als solchen einsetzen.
+Man kann auch mehrere getrennte Systeme damit aufsetzen und dadurch eine Microservice-Landschaft bauen,
+wenn man die Vernetzung manuell oder mit Kubernetes macht, und die Integration manuell. Letzteres bedeutet
+z.B., dass wenn Template-Engine und LaTeX in zwei getrennten Monolithen laufen, man jeweils auch die Plugins
+für die Integration installieren muss -- das passiert nicht automatisch, nur weil sie vernetzt sind.
+
+ETCD wäre dann kein Kernbestandteil mehr. Stattdessen könnte es Plugins geben, die mit ETCD interagieren.
+Die direkte Kommunikation von einem Modul mit einem anderen findet aber grundsätzlich Prozessintern statt.

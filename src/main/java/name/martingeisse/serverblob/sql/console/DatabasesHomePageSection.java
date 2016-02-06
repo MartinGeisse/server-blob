@@ -4,7 +4,7 @@
  * This file is distributed under the terms of the MIT license.
  */
 
-package name.martingeisse.serverblob.sql;
+package name.martingeisse.serverblob.sql.console;
 
 import org.apache.wicket.markup.html.WebPage;
 import name.martingeisse.serverblob.console.HomePageSection;
