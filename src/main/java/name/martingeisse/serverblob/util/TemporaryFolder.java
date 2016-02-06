@@ -19,6 +19,8 @@ import org.apache.commons.io.FileUtils;
  * the folder is intentionally kept (e.g. for diagnostic purposes).
  * 
  * The temporary folder is created as a subfolder of resource/tmp.
+ * 
+ * TODO convert to an injected service
  */
 public class TemporaryFolder implements Closeable {
 
@@ -44,7 +46,7 @@ public class TemporaryFolder implements Closeable {
 
 	//
 	static {
-		parentFolder = new File("resource/tmp");
+		parentFolder = new File("/Users/martin/workspace/server-blob/resource/tmp");
 		try {
 			FileUtils.deleteDirectory(parentFolder);
 		} catch (IOException e) {

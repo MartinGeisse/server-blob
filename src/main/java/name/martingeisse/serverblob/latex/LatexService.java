@@ -46,10 +46,11 @@ public class LatexService {
 	 * @param sourceStream the stream from which the source file gets read
 	 * @param pdfStream the stream to which the rendered PDF gets written
 	 * @param errorWriter the writer to which error messages get written.
+	 * @return true on success, false on failure
 	 * @throws IOException on I/O errors
 	 */
-	public void render(final InputStream sourceStream, final OutputStream pdfStream, final Writer errorWriter) throws IOException {
-		render(sourceStream, pdfStream, new WriterOutputStream(errorWriter, StandardCharsets.ISO_8859_1));
+	public boolean render(final InputStream sourceStream, final OutputStream pdfStream, final Writer errorWriter) throws IOException {
+		return render(sourceStream, pdfStream, new WriterOutputStream(errorWriter, StandardCharsets.ISO_8859_1));
 	}
 	
 	/**
@@ -59,22 +60,33 @@ public class LatexService {
 	 * @param sourceStream the stream from which the source file gets read
 	 * @param pdfStream the stream to which the rendered PDF gets written
 	 * @param errorStream the stream to which error messages get written.
+	 * @return true on success, false on failure
 	 * @throws IOException on I/O errors
 	 */
-	public void render(final InputStream sourceStream, final OutputStream pdfStream, final OutputStream errorStream) throws IOException {
+	public boolean render(final InputStream sourceStream, final OutputStream pdfStream, final OutputStream errorStream) throws IOException {
+		boolean success;
 		try (TemporaryFolder folder = new TemporaryFolder()) {
 			File sourceFile = new File(folder.getInstanceFolder(), "document.tex");
 			FileUtils.copyInputStreamToFile(sourceStream, sourceFile);
 			CommandLine commandLine = new CommandLine("/Library/TeX/texbin/pdflatex");
 			commandLine.addArgument("-halt-on-error");
 			commandLine.addArgument(sourceFile.getName());
-			DefaultExecutor executor = new DefaultExecutor();
+			DefaultExecutor executor = new DefaultExecutor() {
+				@Override
+				public boolean isFailure(int exitValue) {
+					return false;
+				}
+			};
 			executor.setWorkingDirectory(folder.getInstanceFolder());
 			executor.setStreamHandler(new PumpStreamHandler(errorStream));
-			executor.execute(commandLine);
+			int exitCode = executor.execute(commandLine);
+			success = (exitCode == 0);
 			File outputFile = new File(folder.getInstanceFolder(), "document.pdf");
-			FileUtils.copyFile(outputFile, pdfStream);
+			if (outputFile.exists()) {
+				FileUtils.copyFile(outputFile, pdfStream);
+			}
 		}
+		return success;
 	}
 
 

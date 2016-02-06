@@ -17,7 +17,6 @@ import java.util.Map;
  */
 public abstract class DatabaseConfiguration {
 
-	private final String displayName;
 	private final String hostName;
 	private final Integer explicitPort;
 	private final String databaseName;
@@ -31,7 +30,6 @@ public abstract class DatabaseConfiguration {
 	 * @param sectionName the name of the configuration section
 	 */
 	public DatabaseConfiguration(final Map<String, String> configuration, final String sectionName) {
-		this.displayName = getRequired(configuration, sectionName + ".displayName");
 		this.hostName = getRequired(configuration, sectionName + ".hostName");
 		this.explicitPort = getOptionalInteger(configuration, sectionName + ".explicitPort");
 		this.databaseName = getRequired(configuration, sectionName + ".databaseName");
@@ -58,14 +56,6 @@ public abstract class DatabaseConfiguration {
 		} catch (final NumberFormatException e) {
 			throw new RuntimeException("expected integer value for configuration key " + key);
 		}
-	}
-
-	/**
-	 * Getter method for the displayName.
-	 * @return the displayName
-	 */
-	public String getDisplayName() {
-		return displayName;
 	}
 
 	/**

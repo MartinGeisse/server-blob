@@ -20,10 +20,8 @@ import org.apache.wicket.model.PropertyModel;
 import name.martingeisse.serverblob.console.AbstractDefaultLayoutPage;
 import name.martingeisse.serverblob.console.wicket.MyWicketApplication;
 import name.martingeisse.serverblob.dependency_injection.DependencyListModel;
-import name.martingeisse.serverblob.sql.DatabaseConfiguration;
 import name.martingeisse.serverblob.sql.SqlService;
 import name.martingeisse.serverblob.sql.inspect.SqlInspector;
-import name.martingeisse.serverblob.util.MappedComparator;
 
 /**
  *
@@ -39,21 +37,13 @@ public class DatabasesPage extends AbstractDefaultLayoutPage {
 			@Override
 			public List<String> getObject() {
 				List<String> list = new ArrayList<>(sqlService.getDatabaseIds());
-				Collections.sort(list, MappedComparator.of(id -> sqlService.getDatabaseConfiguration(id).getDisplayName()));
+				Collections.sort(list);
 				return list;
 			}
 		};
 		getLayoutBorder().add(new ListView<String>("databases", databaseIdListModel) {
 			@Override
 			protected void populateItem(ListItem<String> databaseItem) {
-				IModel<DatabaseConfiguration> configurationModel = new AbstractReadOnlyModel<DatabaseConfiguration>() {
-					@Override
-					public DatabaseConfiguration getObject() {
-						return sqlService.getDatabaseConfiguration(databaseItem.getModelObject());
-					};
-				};
-				
-				databaseItem.add(new Label("displayName", new PropertyModel<>(configurationModel, "displayName")));
 				databaseItem.add(new Label("id", databaseItem.getModel()));
 				IModel<List<String>> tableNamesModel = new AbstractReadOnlyModel<List<String>>() {
 					@Override
