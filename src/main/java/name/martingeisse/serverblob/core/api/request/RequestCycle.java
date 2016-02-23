@@ -4,11 +4,11 @@
  * This file is distributed under the terms of the MIT license.
  */
 
-package name.martingeisse.api_new.request;
+package name.martingeisse.serverblob.core.api.request;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import name.martingeisse.api_new.request.parameter.Parameters;
+import name.martingeisse.serverblob.core.api.request.parameter.Parameters;
 
 /**
  * This is an abstraction to deal with the request and response. The most

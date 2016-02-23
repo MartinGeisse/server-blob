@@ -4,7 +4,7 @@
  * This file is distributed under the terms of the MIT license.
  */
 
-package name.martingeisse.api_new.request.parameter;
+package name.martingeisse.serverblob.core.api.request.parameter;
 
 /**
  * This interface represents querystring or x-www-form-urlencoded parameters.

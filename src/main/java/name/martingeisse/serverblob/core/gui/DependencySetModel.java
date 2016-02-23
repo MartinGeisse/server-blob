@@ -4,7 +4,7 @@
  * This file is distributed under the terms of the MIT license.
  */
 
-package name.martingeisse.serverblob.dependency_injection;
+package name.martingeisse.serverblob.core.gui;
 
 import java.util.HashSet;
 import java.util.Set;

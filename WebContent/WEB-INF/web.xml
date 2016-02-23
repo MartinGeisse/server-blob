@@ -13,7 +13,7 @@
 	<display-name>Server-Blob</display-name>
 	<listener>
 		<display-name>Dependency Injection Listener</display-name>
-		<listener-class>name.martingeisse.serverblob.dependency_injection.MyGuiceServletContextListener</listener-class>
+		<listener-class>name.martingeisse.serverblob.core.di.BootstrappingServletContextListener</listener-class>
 	</listener>
     <filter>
         <filter-name>GuiceFilter</filter-name>

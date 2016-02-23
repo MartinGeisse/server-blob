@@ -19,7 +19,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import name.martingeisse.serverblob.console.AbstractDefaultLayoutPage;
 import name.martingeisse.serverblob.console.wicket.MyWicketApplication;
-import name.martingeisse.serverblob.dependency_injection.DependencyListModel;
+import name.martingeisse.serverblob.core.gui.DependencyListModel;
 import name.martingeisse.serverblob.sql.SqlService;
 import name.martingeisse.serverblob.sql.inspect.SqlInspector;
 

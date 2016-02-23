@@ -10,9 +10,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import com.google.inject.Inject;
+import name.martingeisse.serverblob.core.gui.util.AjaxRequestUtil;
 import name.martingeisse.serverblob.dependency_injection.Extension;
 import name.martingeisse.serverblob.sql.SqlService;
-import name.martingeisse.serverblob.util.AjaxRequestUtil;
 
 /**
  * This tool counts the rows in a table.

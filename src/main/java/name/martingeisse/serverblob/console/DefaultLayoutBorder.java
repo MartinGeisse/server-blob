@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
-import name.martingeisse.serverblob.dependency_injection.DependencyListModel;
+import name.martingeisse.serverblob.core.gui.DependencyListModel;
 
 /**
  * Implements the standard layout of the management console.

@@ -4,7 +4,7 @@
  * This file is distributed under the terms of the MIT license.
  */
 
-package name.martingeisse.serverblob.util;
+package name.martingeisse.serverblob.core.gui.util;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;

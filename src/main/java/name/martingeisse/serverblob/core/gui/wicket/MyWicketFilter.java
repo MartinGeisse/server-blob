@@ -4,7 +4,7 @@
  * This file is distributed under the terms of the MIT license.
  */
 
-package name.martingeisse.serverblob.dependency_injection;
+package name.martingeisse.serverblob.core.gui.wicket;
 
 import org.apache.wicket.protocol.http.IWebApplicationFactory;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Extends the regular wicket filter to create the application object using
+ * Extends the regular Wicket filter to create the application object using
  * Guice's binding for {@link WebApplication}.
  */
 public class MyWicketFilter extends WicketFilter {
